@@ -4,7 +4,7 @@ import argparse
 import os
 
 """
-mapping clarification from experiment group to file
+mapping clarification: experiment group --> file
 game_input = "file S"
 game_groundtruth = "file C"
 game_chat_zero = "file B"
