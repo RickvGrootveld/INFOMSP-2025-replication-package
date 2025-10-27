@@ -30,6 +30,14 @@ rank_dict = {
     "5": "Q39_5",
 }
 
+approach_mapping = {
+    "1": "Claude few-shot",
+    "2": "GPT-5 zero-shot",
+    "3": "Ground truth",
+    "4": "Claude zero-shot",
+    "5": "GPT-5 few-shot",
+}
+
 python_knowledge_dict = {
     "experience": "Q5",
     "use": "Q6",
@@ -110,7 +118,7 @@ def compute_summary(df: pd.DataFrame, survey_name: str):
 
     print(f"\n=== Per-Metric Summary Statistics for {survey_name} ===")
     for metric, df_metric in per_metric_df.items():
-        print(f"\n-- {metric.upper()} --")
+        print(f"\n-- Perceived {metric} --")
         print(df_metric)
 
     return {"overall": overall_df, "per_metric": per_metric_df}
@@ -223,33 +231,31 @@ def analyze_survey(file_path: str, survey_name: str):
     plot_divergent_stacked_bar_chart(df, survey_name)
 
 # Make record ranking visual
-def load_rank_data(filepath: str, rank_dict: dict) -> pd.DataFrame:
+def load_rank_data(filepath: str) -> pd.DataFrame:
     """
-    Load a Qualtrics CSV file and return a tidy DataFrame of rankings.
-    Each row = participant, each column = approach, cell = rank number.
+    Load a Qualtrics CSV and return a participant x approach DataFrame.
+    Each cell = ranking number assigned by that participant.
     """
     df = pd.read_csv(filepath)
-
-    # Reverse the mapping: question -> rank number
     question_to_rank = {v: int(k) for k, v in rank_dict.items()}
 
-    # Extract relevant columns
-    df_ranks = df[list(question_to_rank.keys())].copy()
+    # Build tidy data: (participant, approach, rank)
+    rows = []
+    for participant_idx, row in df.iterrows():
+        for rank_col, rank in question_to_rank.items():
+            approach_code = str(row[rank_col])
+            if approach_code in approach_mapping:
+                approach = approach_mapping[approach_code]
+                rows.append({
+                    "Participant": participant_idx + 1,
+                    "Approach": approach,
+                    "Rank": rank
+                })
 
-    # Build a participant x approach table
-    tidy = pd.DataFrame()
-    for q_col, rank in question_to_rank.items():
-        # Each Q39_x column contains the approach name that was ranked this rank
-        tidy[q_col] = df[q_col]
+    tidy = pd.DataFrame(rows)
 
-    # Melt so each participant’s rankings become rows
-    melted = tidy.melt(ignore_index=False, var_name="Question", value_name="Approach")
-    melted["Rank"] = melted["Question"].map(question_to_rank)
-    melted = melted.drop(columns="Question")
-
-    # Pivot to wide format: participant x approach
-    ranking_table = melted.pivot_table(index=melted.index, columns="Approach", values="Rank")
-
+    # Pivot to participant x approach table
+    ranking_table = tidy.pivot(index="Participant", columns="Approach", values="Rank")
     return ranking_table
 
 
@@ -272,7 +278,7 @@ def create_heatmap(ranking_table: pd.DataFrame, title: str = "Participant Rankin
     """
     Create a heatmap showing each participant’s ranking per approach.
     """
-    plt.figure(figsize=(8, len(ranking_table) * 0.6 + 2))
+    plt.figure(figsize=(10, len(ranking_table) * 0.6 + 2))
     sns.heatmap(
         ranking_table,
         annot=True,
@@ -281,7 +287,7 @@ def create_heatmap(ranking_table: pd.DataFrame, title: str = "Participant Rankin
         linewidths=0.5,
     )
     plt.title(title)
-    plt.xlabel("LLM")
+    plt.xlabel("Approach")
     plt.ylabel("Participant")
     plt.tight_layout()
     plt.show()
@@ -380,11 +386,11 @@ if __name__ == "__main__":
     analyze_survey("qualtrics results/sumtree_survey_text.csv", "Sumtree")
 
     # Game rankings
-    ranking_df = load_rank_data("qualtrics results/game_survey_text.csv", rank_dict)
+    ranking_df = load_rank_data("qualtrics results/game_survey_text.csv")
     summary = create_summary_table(ranking_df)
     create_heatmap(ranking_df, title="Game2048 Rankings")
-    
+
     # Sumtree rankings
-    ranking_df = load_rank_data("qualtrics results/sumtree_survey_text.csv", rank_dict)
+    ranking_df = load_rank_data("qualtrics results/sumtree_survey_text.csv")
     summary = create_summary_table(ranking_df)
     create_heatmap(ranking_df, title="Sumtree Rankings")
