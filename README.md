@@ -18,4 +18,16 @@ For every python file in this repository, the file can be ran to get the same re
     <strong>Prompt engineering</strong>
     This folder contains the prompt evolution and a folder containing all of the results from the experiment
     </li>
+
+After analysis, the survey was reopened to make it viewable. The surveys can be accessed through:
+
+<li>
+    <strong>Game2048 Survey</strong>
+    Link: https://survey.uu.nl/jfe/form/SV_3gAYEiIxRrptVDE
+</li>
+<li>
+    <strong>Sumtree Survey</strong>
+    Link: https://survey.uu.nl/jfe/form/SV_40X1fYZIVz4Dmu2 
+</li>
+
 </ul>
