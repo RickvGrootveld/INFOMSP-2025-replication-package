@@ -20,7 +20,7 @@ import argparse
 from typing import List
 import anthropic
 
-# ---- HARD-CODED API KEY (replace this) ----
+# HARD-CODED API KEY (replace this)
 API_KEY = "[API_KEY-HERE]"
 if API_KEY == "sk-ant-REPLACE_ME":
     sys.exit("ERROR: Replace API_KEY with your real Anthropic key before running.")
@@ -141,10 +141,10 @@ def main():
     else:
         content_blocks = build_user_blocks_few(target, practice, user_prompt)
 
-    # --- Create client BEFORE requests
+    # Create client BEFORE requests
     client = anthropic.Anthropic(api_key=API_KEY)
 
-    # --- timing + request kwargs
+    # timing + request kwargs
     start_ts = datetime.now().isoformat(timespec="milliseconds")
     t0 = time.perf_counter()
 
@@ -195,7 +195,6 @@ def main():
     # Clean and finalize output text
     final_text = strip_code_fences(text_result).rstrip() + "\n"
 
-    # Output
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
             f.write(final_text)
