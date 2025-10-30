@@ -114,6 +114,7 @@ def main():
                         help="Files: for zero, 1 path (TARGET). For few, 4 paths: TARGET then 3 PRACTICE.")
     parser.add_argument("--out", default=None, help="Write the annotated code to this path (prints nothing if set)")
     parser.add_argument("--model", default="claude-sonnet-4", help="Anthropic model name")
+    # if model 4 does not work use 4-5
     parser.add_argument("--max-tokens", type=int, default=40960, help="Max output tokens")
     parser.add_argument("--temperature", type=float, default=0.0, help="Sampling temperature")
     parser.add_argument("--system-file", default=None, help="Path to a custom system prompt file")
